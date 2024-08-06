@@ -19,7 +19,13 @@ int main() {
   cout << endl;
   dict.erase(it);
   dict.erase(6);
+  dict[10] = -23;
   for (auto pt: dict)
     cout << pt.first << ' ' << pt.second << endl;
+  try {
+    cout << dict.at(0) << endl;
+  } catch(std::out_of_range &err) {
+    cerr << "std::out_of_range: " << err.what() << endl;
+  }
   return 0;
 }

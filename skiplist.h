@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
 #include <utility>
 
 template <typename K, typename V> class SkipList {
@@ -50,6 +51,7 @@ private:
   static const int PS = RAND_MAX / ip;
 
   static bool accessible(node_t *ptr) { return ptr && ptr->val; }
+  static bool accessible(iter_t it) { return accessible(it.nd); }
 
   static int _randLev() {
     int lv = 1;
@@ -80,10 +82,8 @@ public:
   const_iterator cbegin() const { return iterator(head->forward[0]); }
   const_iterator cend() const { return iterator(tail); }
 
-  void insert(const K &key, const V &value) {
+  iterator insert(const K &key, const V &value) {
     static node_t *update[L + 1];
-    int lv = _randLev();
-    node_t *newNode = new node_t(key, value, lv);
     node_t *p = head;
 
     for (int i = L; i >= 0; --i) {
@@ -94,9 +94,11 @@ public:
     p = p->forward[0];
     if (accessible(p) && !(p->val->first > key)) {
       p->val->second = value;
-      return;
+      return iterator(p);
     }
 
+    int lv = _randLev();
+    node_t *newNode = new node_t(key, value, lv);
     for (int i = lv; i >= 0; --i) {
       newNode->back[i] = update[i];
       newNode->forward[i] = update[i]->forward[i];
@@ -104,6 +106,7 @@ public:
       newNode->forward[i]->back[i] = newNode;
     }
     ++length;
+    return iterator(newNode);
   }
 
   iterator erase(const iterator &pos) {
@@ -130,14 +133,24 @@ public:
     else
       return iterator(tail);
   }
-  const_iterator find(const K &key) const { return find(key); }
 
   size_type erase(const K &key) {
     iterator p = find(key);
-    if (!accessible(p.nd))
+    if (!accessible(p))
       return 0;
     else
       return erase(p), 1;
+  }
+
+  V& at(const K& key) {
+    iterator it = find(key);
+    if (accessible(it)) return it->second;
+    else throw std::out_of_range("skiplist::at");
+  }
+  V& operator[](const K& key) {
+    iterator it = find(key);
+    if (accessible(it)) return it->second;
+    else return insert(key, V())->second;
   }
 
   bool empty() const { return !length; }
