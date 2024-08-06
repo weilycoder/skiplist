@@ -32,7 +32,9 @@ private:
     }
     ~node_t() { delete[] forward, delete[] back; }
   } *head, *tail;
+
   size_type length;
+
   struct iter_t {
     node_t *nd;
     iter_t() : nd(NULL) {}
@@ -58,6 +60,7 @@ private:
 
 public:
   typedef iter_t iterator;
+  typedef const iterator const_iterator;
   SkipList() : length(0) {
     head = new node_t(L);
     tail = new node_t(L);
@@ -65,9 +68,17 @@ public:
       head->forward[i] = tail, tail->back[i] = head;
   }
 
-  iterator before_begin() const { return iterator(head); }
-  iterator begin() const { return iterator(head->forward[0]); }
-  iterator end() const { return iterator(tail); }
+  iterator before_begin() { return iterator(head); }
+  iterator begin() { return iterator(head->forward[0]); }
+  iterator end() { return iterator(tail); }
+
+  const_iterator before_begin() const { return iterator(head); }
+  const_iterator begin() const { return iterator(head->forward[0]); }
+  const_iterator end() const { return iterator(tail); }
+
+  const_iterator cbefore_begin() const { return iterator(head); }
+  const_iterator cbegin() const { return iterator(head->forward[0]); }
+  const_iterator cend() const { return iterator(tail); }
 
   void insert(const K &key, const V &value) {
     static node_t *update[L + 1];
@@ -107,7 +118,7 @@ public:
     return rt;
   }
 
-  iterator find(const K &key) const {
+  iterator find(const K &key) {
     node_t *p = head;
     for (int i = L; i >= 0; --i)
       while (accessible(p->forward[i]) && p->forward[i]->val->first < key)
@@ -117,8 +128,9 @@ public:
     if (accessible(p) && !(p->val->first > key))
       return iterator(p);
     else
-      return end();
+      return iterator(tail);
   }
+  const_iterator find(const K &key) const { return find(key); }
 
   size_type erase(const K &key) {
     iterator p = find(key);
@@ -128,6 +140,10 @@ public:
       return erase(p), 1;
   }
 
+  bool empty() const { return !length; }
   size_type size() const { return length; }
+  size_type max_size() const {
+    return std::numeric_limits<difference_type>::max() / sizeof(node_t);
+  }
 #undef L
 };
