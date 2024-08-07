@@ -60,27 +60,60 @@ private:
     return std::min(L, lv);
   }
 
-public:
-  typedef iter_t iterator;
-  typedef const iterator const_iterator;
-  SkipList() : length(0) {
+  void _init() {
     head = new node_t(L);
     tail = new node_t(L);
     for (int i = L; i >= 0; --i)
       head->forward[i] = tail, tail->back[i] = head;
   }
 
+  void _push_back(const K &key, const V &value) {
+    int lv = _randLev();
+    node_t *newNode = new node_t(key, value, lv);
+    for (int i = lv; i >= 0; --i) {
+      newNode->forward[i] = tail;
+      newNode->back[i] = tail->back[i];
+      tail->back[i] = newNode;
+      newNode->back[i]->forward[i] = newNode;
+    }
+    ++length;
+  }
+
+public:
+  typedef iter_t iterator;
+  typedef const iterator const_iterator;
+  SkipList() : length(0) { _init(); }
+  SkipList(const skip_t &other) : length(0) {
+    _init();
+    for (auto &&[k, v] : other)
+      _push_back(k, v);
+  }
+  SkipList(skip_t &&other) {
+    head = other.head;
+    tail = other.tail;
+    length = other.length;
+  }
+  ~SkipList() {
+    node_t *ptr = head;
+    while (ptr != tail) {
+      node_t *temp = ptr;
+      ptr = ptr->forward[0];
+      delete temp;
+    }
+    delete ptr;
+  }
+
   iterator before_begin() { return iterator(head); }
   iterator begin() { return iterator(head->forward[0]); }
   iterator end() { return iterator(tail); }
 
-  const_iterator before_begin() const { return iterator(head); }
-  const_iterator begin() const { return iterator(head->forward[0]); }
-  const_iterator end() const { return iterator(tail); }
+  const_iterator before_begin() const { return const_iterator(head); }
+  const_iterator begin() const { return const_iterator(head->forward[0]); }
+  const_iterator end() const { return const_iterator(tail); }
 
-  const_iterator cbefore_begin() const { return iterator(head); }
-  const_iterator cbegin() const { return iterator(head->forward[0]); }
-  const_iterator cend() const { return iterator(tail); }
+  const_iterator cbefore_begin() const { return const_iterator(head); }
+  const_iterator cbegin() const { return const_iterator(head->forward[0]); }
+  const_iterator cend() const { return const_iterator(tail); }
 
   iterator insert(const K &key, const V &value) {
     static node_t *update[L + 1];
@@ -142,15 +175,19 @@ public:
       return erase(p), 1;
   }
 
-  V& at(const K& key) {
+  V &at(const K &key) {
     iterator it = find(key);
-    if (accessible(it)) return it->second;
-    else throw std::out_of_range("skiplist::at");
+    if (accessible(it))
+      return it->second;
+    else
+      throw std::out_of_range("skiplist::at");
   }
-  V& operator[](const K& key) {
+  V &operator[](const K &key) {
     iterator it = find(key);
-    if (accessible(it)) return it->second;
-    else return insert(key, V())->second;
+    if (accessible(it))
+      return it->second;
+    else
+      return insert(key, V())->second;
   }
 
   bool empty() const { return !length; }
