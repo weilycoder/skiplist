@@ -14,15 +14,16 @@
 
 4. `insert`：语义与 `map` 的 `insert_or_assign` 类似，插入元素，若存在则赋值。
    ```cpp
-   iterator insert(const K &key, const V &value)
+   iterator insert(const K &key, const V &value);
+   iterator insert(const value_type &pair);
    ```
 
    复杂度期望 $O(\log n)$。
 
 5. `erase`：语义与 `map` 的 `erase` 类似，删除元素。
    ```cpp
-   iterator erase(const iterator &pos)
-   size_type erase(const K &key)
+   iterator erase(const iterator &pos);
+   size_type erase(const K &key);
    ```
 
    + 对于第一个原型，返回 `pos` 的下一个迭代器，复杂度 $O(1)$；
@@ -31,7 +32,7 @@
 6. `find`：语义与 `map` 的 `find` 类似，查询元素。
 
    ```cpp
-   iterator find(const K &key)
+   iterator find(const K &key);
    ```
 
    复杂度期望 $O(\log n)$，若元素不存在，返回尾后迭代器。
@@ -39,7 +40,7 @@
 7. `at`：语义与 `map` 的 `at` 类似，返回元素的值，若不存在则报错。
 
    ```cpp
-   V &at(const K &key)
+   V &at(const K &key);
    ```
 
    期望复杂度 $O(\log n)$。
@@ -60,9 +61,10 @@
    SkipList();
    SkipList(const skip_t &other);
    SkipList(skip_t &&other);
+   SkipList(std::initializer_list<value_type> init);
    ```
 
-   第二种构造是 $O(n)$ 的，其余是 $O(1)$ 的。
+   第二种构造是 $O(n)$ 的，第四种构造是 $O(n\log n)$ 的，其余是 $O(1)$ 的。
 
 11. `(destructor)`：销毁容器，释放空间，复杂度 $O(n)$。
 

@@ -1,9 +1,10 @@
 #include "skiplist.h"
 #include <iostream>
+#include <vector>
 using namespace std;
 
 void show() {
-  SkipList<int, int> dict;
+  SkipList<int, int> dict{{-63, 4}};
   cout << dict.max_size() << endl;
   dict.insert(0, 10);
   cout << dict.size() << endl;
@@ -12,7 +13,7 @@ void show() {
   dict.insert(2, 100);
   dict.insert(-1, 23);
   dict.insert(6, 12);
-  dict.insert(10, -20);
+  dict.insert(make_pair(10, -20));
   cout << dict.size() << endl;
   for (auto pt : dict)
     cout << pt.first << ' ' << pt.second << endl;
@@ -33,6 +34,12 @@ void show() {
     cout << k << ' ' << v << endl;
   copy = dict;
   cout << dict.size() << endl;
+  vector<pair<char, int>> v;
+  for (int i = 'a'; i <= 'z'; ++i)
+    v.emplace_back(i, i);
+  SkipList<char, int> dci(v.begin(), v.begin() + 5);
+  for (auto &&[k, v] : dci)
+    cout << k << ' ' << v << endl;
 }
 
 int main() {

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <initializer_list>
 #include <stdexcept>
 #include <utility>
 
@@ -103,6 +104,24 @@ public:
     tail = other.tail;
     length = other.length;
   }
+  SkipList(std::initializer_list<value_type> init) {
+    _init();
+    if (std::is_sorted(init.begin(), init.end()))
+      for (auto &&[k, v] : init)
+        _push_back(k, v);
+    else
+      for (const auto &pair : init)
+        insert(pair);
+  }
+  template <class InputIt> SkipList(InputIt first, InputIt last) {
+    _init();
+    if (std::is_sorted(first, last))
+      for (InputIt it = first; it != last; ++it)
+        _push_back(it->first, it->second);
+    else
+      for (InputIt it = first; it != last; ++it)
+        insert(it->first, it->second);
+  }
   ~SkipList() { _destory(); }
 
   skip_t &operator=(const skip_t &other) {
@@ -151,6 +170,9 @@ public:
     }
     ++length;
     return iterator(newNode);
+  }
+  iterator insert(const value_type &pair) {
+    return insert(pair.first, pair.second);
   }
 
   iterator erase(const iterator &pos) {
