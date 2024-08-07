@@ -55,7 +55,7 @@
    }
    ```
 
-10. `(constructor)`：接受三种构造方式
+10. `(constructor)`：接受以下构造方式
 
    ```cpp
    SkipList();
