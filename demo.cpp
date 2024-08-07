@@ -29,6 +29,10 @@ void show() {
   }
   cout << copy.size() << endl;
   cout << copy.at(6) << endl;
+  for (auto &&[k, v] : copy)
+    cout << k << ' ' << v << endl;
+  copy = dict;
+  cout << dict.size() << endl;
 }
 
 int main() {

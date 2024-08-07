@@ -67,6 +67,16 @@ private:
       head->forward[i] = tail, tail->back[i] = head;
   }
 
+  void _destory() {
+    node_t *ptr = head;
+    while (ptr != tail) {
+      node_t *temp = ptr;
+      ptr = ptr->forward[0];
+      delete temp;
+    }
+    delete ptr;
+  }
+
   void _push_back(const K &key, const V &value) {
     int lv = _randLev();
     node_t *newNode = new node_t(key, value, lv);
@@ -93,14 +103,15 @@ public:
     tail = other.tail;
     length = other.length;
   }
-  ~SkipList() {
-    node_t *ptr = head;
-    while (ptr != tail) {
-      node_t *temp = ptr;
-      ptr = ptr->forward[0];
-      delete temp;
-    }
-    delete ptr;
+  ~SkipList() { _destory(); }
+
+  skip_t &operator=(const skip_t &other) {
+    if (other.head == head)
+      return *this;
+    _destory(), _init();
+    for (auto &&[k, v] : other)
+      _push_back(k, v);
+    return *this;
   }
 
   iterator before_begin() { return iterator(head); }
