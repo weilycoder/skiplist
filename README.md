@@ -62,9 +62,10 @@
    SkipList(const skip_t &other);
    SkipList(skip_t &&other);
    SkipList(std::initializer_list<value_type> init);
+   template <class InputIt> SkipList(InputIt first, InputIt last);
    ```
 
-   第二种构造是 $O(n)$ 的，第四种构造是 $O(n\log n)$ 的，其余是 $O(1)$ 的。
+   第二种构造是 $O(n)$ 的，第四、五种构造是 $O(n\log n)$ 的（有序则 $O(n)$），其余是 $O(1)$ 的。
 
 11. `(destructor)`：销毁容器，释放空间，复杂度 $O(n)$。
 
