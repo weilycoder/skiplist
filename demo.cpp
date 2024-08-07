@@ -33,7 +33,10 @@ void show() {
   for (auto &&[k, v] : copy)
     cout << k << ' ' << v << endl;
   copy = dict;
-  cout << dict.size() << endl;
+  cout << copy.size() << ' ' << dict.size() << endl;
+  copy[998244353] = -1;
+  swap(copy, dict);
+  cout << dict.size() << ' ' << dict[998244353] << endl;
   vector<pair<char, int>> v;
   for (int i = 'a'; i <= 'z'; ++i)
     v.emplace_back(i, i);

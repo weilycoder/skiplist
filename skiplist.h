@@ -62,6 +62,7 @@ private:
   }
 
   void _init() {
+    length = 0;
     head = new node_t(L);
     tail = new node_t(L);
     for (int i = L; i >= 0; --i)
@@ -93,8 +94,8 @@ private:
 public:
   typedef iter_t iterator;
   typedef const iterator const_iterator;
-  SkipList() : length(0) { _init(); }
-  SkipList(const skip_t &other) : length(0) {
+  SkipList() { _init(); }
+  SkipList(const skip_t &other) {
     _init();
     for (auto &&[k, v] : other)
       _push_back(k, v);
@@ -132,6 +133,15 @@ public:
       _push_back(k, v);
     return *this;
   }
+  bool operator==(const skip_t &other) const {
+    if (length != other.length)
+      return false;
+    for (auto it = begin(), oit = other.begin(); it != end(); ++it, ++oit)
+      if (*it != *oit)
+        return false;
+    return true;
+  }
+  bool operator!=(const skip_t &other) const { return !(*this == other); }
 
   iterator before_begin() { return iterator(head); }
   iterator begin() { return iterator(head->forward[0]); }
@@ -223,6 +233,12 @@ public:
       return insert(key, V())->second;
   }
 
+  void swap(skip_t &other) {
+    std::swap(head, other.head);
+    std::swap(tail, other.tail);
+    std::swap(length, other.length);
+  }
+
   bool empty() const { return !length; }
   size_type size() const { return length; }
   size_type max_size() const {
@@ -230,3 +246,10 @@ public:
   }
 #undef L
 };
+
+namespace std {
+template <typename K, typename V>
+void swap(SkipList<K, V> &a, SkipList<K, V> &b) {
+  a.swap(b);
+}
+} // namespace std
