@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -16,7 +17,7 @@ public:
   typedef std::size_t size_type;
 
 private:
-#define L 32
+#define L 31
   static const size_t ip = 4;
   struct node_t {
     int level;
@@ -55,7 +56,7 @@ private:
   static bool accessible(iter_t it) { return accessible(it.nd); }
 
   static int _randLev() {
-    int lv = 1;
+    int lv = 0;
     while (rand() < PS)
       ++lv;
     return std::min(L, lv);
