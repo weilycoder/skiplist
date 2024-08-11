@@ -4,6 +4,7 @@
 using namespace std;
 
 void show() {
+  cout << __cplusplus << endl;
   SkipList<int, int> dict{{-63, 4}};
   cout << dict.max_size() << endl;
 
@@ -32,8 +33,13 @@ void show() {
   }
   cout << copy.size() << endl;
   cout << copy.at(6) << endl;
+#if __cplusplus >= 201703L
   for (auto &&[k, v] : copy)
     cout << k << ' ' << v << endl;
+#else
+    for (auto p : copy)
+      cout << p.first << ' ' << p.second << endl;
+#endif
   copy = dict;
   cout << copy.size() << ' ' << dict.size() << endl;
   copy[998244353] = -1;
@@ -44,8 +50,13 @@ void show() {
   for (int i = 'a'; i <= 'z'; ++i)
     vci.emplace_back(i, i);
   SkipList<char, int> dci(vci.begin(), vci.begin() + 5);
+#if __cplusplus >= 201703L
   for (auto &&[k, v] : dci)
     cout << k << ' ' << v << endl;
+#else
+    for (auto p : dci)
+      cout << p.first << ' ' << p.second << endl;
+#endif
   cout << (dci.begin() + 2)->first << endl;
   for (auto it = dci.end() - 1; it != dci.before_begin(); --it)
     cout << it->first << ' ' << it->second << endl;

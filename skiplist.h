@@ -93,6 +93,14 @@ private:
     }
     bool operator==(const iter_t &b) const { return node == b.node; }
     bool operator!=(const iter_t &b) const { return node != b.node; }
+#if __cplusplus >= 202002L
+    int operator<=>(const iter_t &b) const { return rank() - b.rank(); }
+#else
+    bool operator<(const iter_t &b) const { return rank() < b.rank(); }
+    bool operator>(const iter_t &b) const { return rank() > b.rank(); }
+    bool operator<=(const iter_t &b) const { return rank() <= b.rank(); }
+    bool operator>=(const iter_t &b) const { return rank() >= b.rank(); }
+#endif
   };
 
   typedef SkipList skip_t;
@@ -147,8 +155,13 @@ public:
   SkipList() { _init(); }
   SkipList(const skip_t &other) {
     _init();
+#if __cplusplus >= 201703L
     for (auto &&[k, v] : other)
       _push_back(k, v);
+#else
+    for (auto pair : other)
+      _push_back(pair.first, pair.second);
+#endif
   }
   SkipList(skip_t &&other) {
     head = other.head;
@@ -158,8 +171,13 @@ public:
   SkipList(std::initializer_list<value_type> init) {
     _init();
     if (std::is_sorted(init.begin(), init.end()))
+#if __cplusplus >= 201703L
       for (auto &&[k, v] : init)
         _push_back(k, v);
+#else
+      for (auto pair : init)
+        _push_back(pair.first, pair.second);
+#endif
     else
       for (const auto &pair : init)
         insert(pair);
@@ -179,8 +197,13 @@ public:
     if (other.head == head)
       return *this;
     _destory(), _init();
+#if __cplusplus >= 201703L
     for (auto &&[k, v] : other)
       _push_back(k, v);
+#else
+    for (auto pair : other)
+      _push_back(pair.first, pair.second);
+#endif
     return *this;
   }
   bool operator==(const skip_t &other) const {

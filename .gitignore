@@ -1,5 +1,7 @@
+.cph
 .vscode
 *.exe
 *.exp
 *.lib
 *.pdb
+*.log
