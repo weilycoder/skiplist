@@ -43,6 +43,10 @@ void show() {
   SkipList<char, int> dci(v.begin(), v.begin() + 5);
   for (auto &&[k, v] : dci)
     cout << k << ' ' << v << endl;
+  for (auto it = dci.end(); it != dci.before_begin(); --it) {
+    if (it == dci.end()) --it;
+    cout << it->first << ' ' << it->second << endl;
+  }
 }
 
 int main() {

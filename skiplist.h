@@ -45,6 +45,7 @@ private:
     reference operator*() { return *nd->val; }
     value_type *operator->() { return nd->val; }
     iter_t &operator++() { return nd = nd->forward[0], *this; }
+    iter_t &operator--() { return nd = nd->back[0], *this; }
     bool operator==(const iter_t &b) const { return nd == b.nd; }
     bool operator!=(const iter_t &b) const { return nd != b.nd; }
   };
@@ -157,7 +158,7 @@ public:
   const_iterator cend() const { return const_iterator(tail); }
 
   iterator insert(const K &key, const V &value) {
-    static node_t *update[L + 1];
+    node_t *update[L + 1];
     node_t *p = head;
 
     for (int i = L; i >= 0; --i) {
