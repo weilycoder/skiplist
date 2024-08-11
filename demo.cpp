@@ -6,6 +6,7 @@ using namespace std;
 void show() {
   SkipList<int, int> dict{{-63, 4}};
   cout << dict.max_size() << endl;
+
   dict.insert(0, 10);
   cout << dict.size() << endl;
   auto it = dict.find(0);
@@ -18,6 +19,7 @@ void show() {
   for (auto pt : dict)
     cout << pt.first << ' ' << pt.second << endl;
   dict.erase(it);
+
   SkipList<int, int> copy(dict);
   dict.erase(6);
   dict[10] = -23;
@@ -37,12 +39,16 @@ void show() {
   copy[998244353] = -1;
   swap(copy, dict);
   cout << dict.size() << ' ' << dict[998244353] << endl;
+
   vector<pair<char, int>> vci;
   for (int i = 'a'; i <= 'z'; ++i)
     vci.emplace_back(i, i);
   SkipList<char, int> dci(vci.begin(), vci.begin() + 5);
   for (auto &&[k, v] : dci)
     cout << k << ' ' << v << endl;
+  cout << (dci.begin() + 2)->first << endl;
+  for (auto it = dci.end() - 1; it != dci.before_begin(); --it)
+    cout << it->first << ' ' << it->second << endl;
 }
 
 int main() {

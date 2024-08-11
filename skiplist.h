@@ -41,22 +41,65 @@ private:
 
   size_type length;
 
+  static int trace(node_t *&ptr) {
+    int step = 0;
+    while (ptr->back[0]) {
+      int lv = ptr->level;
+      ptr = ptr->back[lv];
+      step += ptr->next_step[lv];
+    }
+    return step;
+  }
+
+  static node_t *next_ptr(node_t *ptr, int step) {
+    if (step <= 0)
+      return ptr;
+    int lv = ptr->level;
+    for (; lv >= 0; --lv) {
+      while (ptr->next_step[lv] <= step)
+        step -= ptr->next_step[lv], ptr = ptr->forward[lv];
+      if (!step || !ptr->forward[0])
+        break;
+    }
+    return ptr;
+  }
+
   struct iter_t {
-    node_t *nd;
-    iter_t() : nd(NULL) {}
-    iter_t(node_t *ptr) : nd(ptr) {}
-    reference operator*() { return *nd->val; }
-    value_type *operator->() { return nd->val; }
-    iter_t &operator++() { return nd = nd->forward[0], *this; }
-    bool operator==(const iter_t &b) const { return nd == b.nd; }
-    bool operator!=(const iter_t &b) const { return nd != b.nd; }
+    node_t *node;
+    iter_t() : node(NULL) {}
+    iter_t(node_t *ptr) : node(ptr) {}
+    int rank() const {
+      node_t *ptr = node;
+      return trace(ptr);
+    }
+    reference operator*() { return *node->val; }
+    value_type *operator->() { return node->val; }
+    iter_t &operator++() { return node = node->forward[0], *this; }
+    iter_t &operator--() { return node = node->back[0], *this; }
+    iter_t operator+(int step) const {
+      if (!step)
+        return *this;
+      if (step == 1)
+        return iter_t(node->forward[0]);
+      if (step == -1)
+        return iter_t(node->back[0]);
+      node_t *ptr = node;
+      int pos = trace(ptr) + step;
+      return iter_t(next_ptr(ptr, pos));
+    }
+    iter_t operator-(int step) const { return *this + (-step); }
+    difference_type operator-(const iter_t &b) const {
+      return rank() - b.rank();
+    }
+    bool operator==(const iter_t &b) const { return node == b.node; }
+    bool operator!=(const iter_t &b) const { return node != b.node; }
   };
 
   typedef SkipList skip_t;
   static const int PS = RAND_MAX / ip;
 
   static bool accessible(node_t *ptr) { return ptr && ptr->val; }
-  static bool accessible(iter_t it) { return accessible(it.nd); }
+  static bool accessible(iter_t it) { return accessible(it.node); }
 
   static int _randLev() {
     int lv = 0;
@@ -163,8 +206,8 @@ public:
   const_iterator cend() const { return const_iterator(tail); }
 
   iterator insert(const K &key, const V &value) {
-    static node_t *update[L + 1];
-    static int step[L + 1];
+    int step[L + 1];
+    node_t *update[L + 1];
     node_t *p = head;
 
     memset(step, 0, sizeof(step));
@@ -188,6 +231,8 @@ public:
       newNode->forward[i] = update[i]->forward[i];
       update[i]->forward[i] = newNode;
       newNode->forward[i]->back[i] = newNode;
+      update[i]->next_step[i] = pos - step[i];
+      newNode->next_step[i] = next_pos - pos;
     }
     ++length;
     return iterator(newNode);
@@ -197,11 +242,29 @@ public:
   }
 
   iterator erase(const iterator &pos) {
-    node_t *ptr = pos.nd;
+    node_t *update[L + 1];
+    node_t *ptr = pos.node;
+
+    int i = 0;
+    for (; i <= ptr->level; ++i)
+      update[i] = ptr->back[i];
+    for (;; ++i) {
+      for (; i <= update[i - 1]->level; ++i)
+        update[i] = update[i - 1];
+      if (i > L)
+        break;
+      update[i] = update[i - 1];
+      while (update[i]->level < i)
+        update[i] = update[i]->back[i - 1];
+    }
+
     for (int i = ptr->level; i >= 0; --i) {
+      ptr->back[i]->next_step[i] += ptr->next_step[i] - 1;
       ptr->back[i]->forward[i] = ptr->forward[i];
       ptr->forward[i]->back[i] = ptr->back[i];
     }
+    for (int i = ptr->level + 1; i <= L; ++i)
+      --update[i]->next_step[i];
     iterator rt(ptr->forward[0]);
     delete ptr;
     --length;
