@@ -37,10 +37,10 @@ void show() {
   copy[998244353] = -1;
   swap(copy, dict);
   cout << dict.size() << ' ' << dict[998244353] << endl;
-  vector<pair<char, int>> v;
+  vector<pair<char, int>> vci;
   for (int i = 'a'; i <= 'z'; ++i)
-    v.emplace_back(i, i);
-  SkipList<char, int> dci(v.begin(), v.begin() + 5);
+    vci.emplace_back(i, i);
+  SkipList<char, int> dci(vci.begin(), vci.begin() + 5);
   for (auto &&[k, v] : dci)
     cout << k << ' ' << v << endl;
 }

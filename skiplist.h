@@ -23,17 +23,20 @@ private:
     int level;
     value_type *val;
     node_t **forward, **back;
+    int *next_step;
     void init() {
       back = new node_t *[level + 1];
       forward = new node_t *[level + 1];
-      memset(back, 0, sizeof(back) * (level + 1));
-      memset(forward, 0, sizeof(forward) * (level + 1));
+      next_step = new int[level + 1];
+      memset(back, 0, sizeof(void *) * (level + 1));
+      memset(forward, 0, sizeof(void *) * (level + 1));
+      memset(next_step, 0, sizeof(int) * (level + 1));
     }
-    node_t(int _l) : val(NULL), level(_l) { init(); }
+    node_t(int _l) : level(_l), val(NULL) { init(); }
     node_t(const K &_k, const V &_v, int _l) : level(_l) {
       val = new value_type(_k, _v), init();
     }
-    ~node_t() { delete[] forward, delete[] back; }
+    ~node_t() { delete[] forward, delete[] back, delete[] next_step; }
   } *head, *tail;
 
   size_type length;
@@ -67,7 +70,7 @@ private:
     head = new node_t(L);
     tail = new node_t(L);
     for (int i = L; i >= 0; --i)
-      head->forward[i] = tail, tail->back[i] = head;
+      head->forward[i] = tail, tail->back[i] = head, head->next_step[i] = 1;
   }
 
   void _destory() {
@@ -88,7 +91,10 @@ private:
       newNode->back[i] = tail->back[i];
       tail->back[i] = newNode;
       newNode->back[i]->forward[i] = newNode;
+      newNode->next_step[i] = 1;
     }
+    for (int i = L; i > lv; --i)
+      ++tail->back[i]->next_step[i];
     ++length;
   }
 
@@ -158,11 +164,13 @@ public:
 
   iterator insert(const K &key, const V &value) {
     static node_t *update[L + 1];
+    static int step[L + 1];
     node_t *p = head;
 
+    memset(step, 0, sizeof(step));
     for (int i = L; i >= 0; --i) {
       while (accessible(p->forward[i]) && p->forward[i]->val->first < key)
-        p = p->forward[i];
+        step[i] += p->next_step[i], p = p->forward[i];
       update[i] = p;
     }
     p = p->forward[0];
@@ -171,9 +179,11 @@ public:
       return iterator(p);
     }
 
+    int pos = step[0] + 1;
     int lv = _randLev();
     node_t *newNode = new node_t(key, value, lv);
     for (int i = lv; i >= 0; --i) {
+      int next_pos = step[i] + update[i]->next_step[i] + 1;
       newNode->back[i] = update[i];
       newNode->forward[i] = update[i]->forward[i];
       update[i]->forward[i] = newNode;
