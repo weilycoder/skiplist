@@ -78,6 +78,6 @@
 
 ## 许可证
 
-项目使用 SATA 许可证，目前 `v2.0.0` 和 `v1.0.0` 在发布许可证前发布。
+项目使用 [SATA 许可证](https://github.com/zTrix/sata-license)，目前 `v2.0.0` 和 `v1.0.0` 在发布许可证前发布。
 
 项目的 README 文档以 `master` 分支为准。
